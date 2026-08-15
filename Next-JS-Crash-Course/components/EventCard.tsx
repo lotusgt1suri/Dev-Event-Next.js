@@ -1,12 +1,27 @@
+"use client";
+
 import Link from "next/link";
 import type { EventItem } from "@/data/events";
 import Image from "next/image";
+import posthog from "posthog-js";
 
 type Props = {
   event: EventItem;
 };
 
 export default function EventCard({ event }: Props) {
+  const handleViewDetails = () => {
+    if (
+      process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN &&
+      process.env.NEXT_PUBLIC_POSTHOG_HOST
+    ) {
+      posthog.capture("event_details_viewed", {
+        event_slug: event.slug,
+        is_remote: event.location === "Remote",
+      });
+    }
+  };
+
   return (
     <li className="overflow-hidden shadow-sm">
       <Image
@@ -36,7 +51,11 @@ export default function EventCard({ event }: Props) {
         </div>
 
         <div className="mt-3">
-          <Link href={`/events/${event.slug}`} className="text-sm underline">
+          <Link
+            href={`/events/${event.slug}`}
+            className="text-sm underline"
+            onClick={handleViewDetails}
+          >
             View details
           </Link>
         </div>
